@@ -4,59 +4,63 @@ public class MatrixMultiplication {
 
     public static int[][] simpleMatrixMultiplication(int row1, int row2, int col1, int col2, int[][] A, int[][] B) {
         //Multiplies two matrices of any size. Javafied version of pg 45 implementation.
+        long start = System.currentTimeMillis();
         if (row2 != col1) {
             System.out.println("Multiplication is not possible.");
             return null;
         }
         int[][] C = new int[row1][col2];
-        for (int i = 0; i < row1; i++) {
-            for (int j = 0; j < col2; j++) {
-                for (int k = 0; k < row2; k++) {
-                    C[i][j] += A[i][k] * B[k][i];
-                }
-            }
-        }
+        for (int i = 0; i < row1; i++)
+            for (int j = 0; j < col2; j++)
+                for (int k = 0; k < row2; k++)
+                    C[i][j] += A[i][k] * B[k][j];
+        long end = System.currentTimeMillis();
+        long totalTime = end - start;
+        System.out.println(totalTime + " Milliseconds\n");
         printMatrix(C, row1, col2);
         return C;
     }
 
     public static void printMatrix(int A[][], int rowSize, int colSize) {
+    // Taken from https://www.geeksforgeeks.org/implementing-strassens-algorithm-in-java/.
+    // Needs to have matrix of size N x N with N being a power of 2
         for (int i = 0; i < rowSize; i++) {
             for (int j = 0; j < colSize; j++)
                 System.out.print(A[i][j] + " ");
 
-            System.out.println();
+                System.out.println();
         }
     }
 
-    public int[][] multiply(int[][] A, int [][] B){
+    public int[][] multiply(int[][] A, int[][] B)
+    {
         int n = A.length;
-        int[][] R = new int [n][n];
+        int[][] R = new int[n][n];
 
-        if (n==1){
-            R[0][0] = A[0][0]*B[0][0];
-        }
+        if (n == 1)
+            R[0][0] = A[0][0] * B[0][0];
+
         else {
-            int[][] A11 = new int[n/2][n/2];
-            int[][] A12 = new int[n/2][n/2];
-            int[][] A21 = new int[n/2][n/2];
-            int[][] A22 = new int[n/2][n/2];
-            int[][] B11 = new int[n/2][n/2];
-            int[][] B12 = new int[n/2][n/2];
-            int[][] B21 = new int[n/2][n/2];
-            int[][] B22 = new int[n/2][n/2];
+            int[][] A11 = new int[n / 2][n / 2];
+            int[][] A12 = new int[n / 2][n / 2];
+            int[][] A21 = new int[n / 2][n / 2];
+            int[][] A22 = new int[n / 2][n / 2];
+            int[][] B11 = new int[n / 2][n / 2];
+            int[][] B12 = new int[n / 2][n / 2];
+            int[][] B21 = new int[n / 2][n / 2];
+            int[][] B22 = new int[n / 2][n / 2];
 
             split(A, A11, 0, 0);
-            split(A, A12, 0, n/2);
-            split(A, A21, n/2, 0);
-            split(A, A22, n/2, n/2);
-            split(B, B11, 0,0);
-            split(B, B12, 0, n/2);
-            split(B, B21, n/2, 0);
-            split(B, B22, n/2, n/2);
+            split(A, A12, 0, n / 2);
+            split(A, A21, n / 2, 0);
+            split(A, A22, n / 2, n / 2);
+            split(B, B11, 0, 0);
+            split(B, B12, 0, n / 2);
+            split(B, B21, n / 2, 0);
+            split(B, B22, n / 2, n / 2);
 
-            int[][] M1 = multiply(add(A21, A22), B11);
-            int [][] M2 = multiply(add(A21, A22), B11);
+            int[][] M1 = multiply(add(A11, A22), add(B11, B22));
+            int[][] M2 = multiply(add(A21, A22), B11);
             int[][] M3 = multiply(A11, sub(B12, B22));
             int[][] M4 = multiply(A22, sub(B21, B11));
             int[][] M5 = multiply(add(A11, A12), B22);
@@ -69,9 +73,9 @@ public class MatrixMultiplication {
             int[][] C22 = add(sub(add(M1, M3), M2), M6);
 
             join(C11, R, 0, 0);
-            join(C12, R, 0, n/2);
-            join(C21, R, n/2, 0);
-            join(C22, R, n/2, n/2);
+            join(C12, R, 0, n / 2);
+            join(C21, R, n / 2, 0);
+            join(C22, R, n / 2, n / 2);
         }
         return R;
     }
@@ -110,27 +114,24 @@ public class MatrixMultiplication {
 
     public static void main(String[] args) {
         System.out.println("Simple Matrix Multiplication \n");
-        int A[][] = {{1, 1, 1},
-                {2, 2, 2},
-                {3, 3, 3},
-                {4, 4, 4}};
+        int A[][] = {{1, 2, 3, 4},
+                {4, 3, 0, 1},
+                {5, 6, 1, 1},
+                {0, 2, 5, 6}};
 
-        int B[][] = {{1, 1, 1, 1},
-                {2, 2, 2, 2},
-                {3, 3, 3, 3}};
-        simpleMatrixMultiplication(4, 3, 3, 4, A, B);
+        int B[][] = {{1, 0, 5, 1},
+                {1, 2, 0, 2},
+                {0, 3, 2, 3},
+                {1, 2, 1, 2}};
+        simpleMatrixMultiplication(4, 4, 4, 4, A, B);
         System.out.println("\n");
         System.out.println("Strassen's Algorithm \n");
         MatrixMultiplication m = new MatrixMultiplication();
-        int N = 4;
-        int[][] C = {{1, 1, 1},
-                {2, 2, 2},
-                {3, 3, 3},
-                {4, 4, 4}};
-        int[][] D = {{1, 1, 1, 1},
-                {2, 2, 2, 2},
-                {3, 3, 3, 3}};
-        int[][] E = m.multiply(C, D);
+        long startTimer = System.currentTimeMillis();
+        int[][] E = m.multiply(A, B);
+        long endTimer = System.currentTimeMillis();
+        long totalTimer = endTimer - startTimer;
+        System.out.println(totalTimer + " Milliseconds \n");
         printMatrix(E, 4, 4);
     }
 }
